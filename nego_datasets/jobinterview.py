@@ -28,13 +28,8 @@ class JIHandler(BaseDatasetHandler):
 
         # convert the DataFrame to a list of dictionaries
         list_of_dicts = df.to_dict(orient='records')
-        # list_of_dicts = [dict for dict in list_of_dicts if dict["flag"] == 0]
+
         self.da_list = list_of_dicts
-
-        # FOR WHEN WE WANT TO ACTUALLY TEST ON THE SAMPLE SET.
-        # self.dataset = [self.dataset[index] for index in ji_sample_indices]
-
-        # self.da_list = [self.da_list[index] for index in ji_sample_indices]
 
     def get_instances(self):
         """Get the instances from the dataset."""
