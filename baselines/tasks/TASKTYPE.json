@@ -1,0 +1,88 @@
+{
+    "T5": {
+        "classification": {
+            "priority": [
+                "mid_partner_ask_high_priority_ca",
+                "mid_partner_ask_low_priority_ca",
+                "mid_partner_ask_high_priority_ji_w",
+                "mid_partner_ask_low_priority_ji_w"
+            ],
+            "deal_likeness": [
+                "end_deal_likeness_ca",
+                "end_deal_satisfaction_ca",
+                "end_partner_deal_likeness_ca",
+                "end_partner_deal_satisfaction_ca"
+            ],
+            "dialog_act": [
+                "mid_dial_act_cra"
+            ]
+        },
+        "regression": {
+            "deal_total": [
+                "end_deal_total_dnd",
+                "end_deal_total_ca"
+            ]
+        },
+        "multi_outputs": {
+            "proposal": [
+                "mid_full_proposal_dnd",
+                "mid_full_proposal_cra",
+                "end_deal_specifics_ji",
+                "end_deal_specifics_ca",
+                "end_deal_specifics_dnd"
+            ],
+            "strategy": [
+                "mid_strategy_ca"
+            ],
+            "dialog_act": [
+                "mid_dial_act_ji"
+            ]
+        },
+        "generation":{
+            "response": [
+                "mid_gen_resp_dnd",
+                "mid_gen_resp_ca"
+            ]
+        }
+    },
+    "Majority": {
+        "classification": {
+            "priority": [
+                "mid_partner_ask_high_priority_ca",
+                "mid_partner_ask_low_priority_ca",
+                "mid_partner_ask_high_priority_ji_w",
+                "mid_partner_ask_low_priority_ji_w"
+            ],
+            "deal_likeness": [
+                "end_deal_likeness_ca",
+                "end_deal_satisfaction_ca",
+                "end_partner_deal_likeness_ca",
+                "end_partner_deal_satisfaction_ca"
+            ],
+            "dialog_act": [
+                "mid_dial_act_cra"
+            ]
+        },
+        "regression": {
+            "deal_total": [
+                "end_deal_total_dnd",
+                "end_deal_total_ca"
+            ]
+        },
+        "multi_outputs": {
+            "proposal": [
+                "mid_full_proposal_dnd",
+                "mid_full_proposal_cra",
+                "end_deal_specifics_ji",
+                "end_deal_specifics_ca",
+                "end_deal_specifics_dnd"
+            ],
+            "strategy": [
+                "mid_strategy_ca"
+            ],
+            "dialog_act": [
+                "mid_dial_act_ji"
+            ]
+        }
+    }
+}
