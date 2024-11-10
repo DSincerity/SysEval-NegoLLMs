@@ -2,7 +2,7 @@
 - This repository contains the code for a systematic evaluation of Large Language Models (LLMs) in negotiation dialogues. This work has been accepted at **Findings of EMNLP 2024**.
 
 - Title: [Are LLMs Effective Negotiators? Systematic Evaluation of the Multifaceted Capabilities of LLMs in Negotiation Dialogues](https://arxiv.org/abs/2402.13550)
-
+<img src="images/main.jpg" alt="Framework" width="700"/>
 - For any queries, please contact the first author: **Brian Deuksin Kwon** (deuksink@usc.edu).
 
 ---
