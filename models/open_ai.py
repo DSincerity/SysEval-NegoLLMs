@@ -134,25 +134,25 @@ class OpenAIHandler(BaseModelHandler):
 
                     outputs[inputs[index]] = "looks good."
 
-                    # try:
-                    #     a, b = self.check_prompt(prompt)
-                    #     if not a:
-                    #         print(f"Length issue at {index}/{len(inputs)}: {b} > {self.token_limit}")
-                    #         continue
+                    try:
+                        a, b = self.check_prompt(prompt)
+                        if not a:
+                            print(f"Length issue at {index}/{len(inputs)}: {b} > {self.token_limit}")
+                            continue
 
-                    #     # outputs[inputs[index]] = "looks good"
+                        # outputs[inputs[index]] = "looks good"
 
-                    #     gen_output = openai.ChatCompletion.create(
-                    #         model = self.model,
-                    #         messages = [{"role": "user", "content": prompt}],
-                    #         temperature = 0
-                    #     )
+                        gen_output = openai.ChatCompletion.create(
+                            model = self.model,
+                            messages = [{"role": "user", "content": prompt}],
+                            temperature = 0
+                        )
 
-                    #     output_text = gen_output["choices"][0]["message"]["content"]
-                    #     outputs[inputs[index]] = output_text
-                    # except:
-                    #     print(f"Some error here.")
-                    #     continue
+                        output_text = gen_output["choices"][0]["message"]["content"]
+                        outputs[inputs[index]] = output_text
+                    except:
+                        print(f"Some error here.")
+                        continue
 
                     if (index + 1) >= self.args.max_num_instances:
                         break
