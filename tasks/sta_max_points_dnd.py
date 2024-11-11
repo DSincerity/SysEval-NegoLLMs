@@ -21,12 +21,12 @@ class MPNDHandlerDND(WBaseTaskHandler):
         base_template = dataset_handler.get_dial_template(counts_bool=True, values_bool=True, dialogue_bool=False, da_bool=False, cot_bool=model_handler.args.use_cot)
 
         prompt_template = base_template.replace("$question$", "What is the maximum number of points that you can possibly get in any deal?").replace("$output_specification$", "Present your answer as a single number with no additional text.")
-        
+
         return prompt_template
 
     def evaluate(self, dataset_handler, model_handler, instances, prompts, ground_truth):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -36,9 +36,12 @@ class MPNDHandlerDND(WBaseTaskHandler):
             ground_truth: The ground truth for the task.
         """
 
-        # get the model outputs - dict from prompt to the output. 
+        # get the model outputs - dict from prompt to the output.
         # It's possible that some are missing so a dict is better than a list.
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -53,7 +56,7 @@ class MPNDHandlerDND(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances
 
 
@@ -87,7 +90,7 @@ class A1MPNDHandlerDND(MPNDHandlerDND):
 
     def get_ground_truth(self, instances):
         """Get the ground truth for the task.
-        
+
         Args:
             instances: A dictionary of rows from the dataset.
         """
@@ -96,10 +99,10 @@ class A1MPNDHandlerDND(MPNDHandlerDND):
             ground_truth.append("10")
 
         return ground_truth
-        
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -109,5 +112,5 @@ class A1MPNDHandlerDND(MPNDHandlerDND):
 
         ground_truth = self.get_ground_truth(instances)
 
-        super().evaluate(dataset_handler, model_handler, 
+        super().evaluate(dataset_handler, model_handler,
                          instances, prompts, ground_truth)

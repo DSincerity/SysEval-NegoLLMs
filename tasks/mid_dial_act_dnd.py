@@ -20,9 +20,9 @@ class DASUHandler(WBaseTaskHandler):
         base_template = dataset_handler.get_utt_template(counts_bool=True, values_bool=True, context_bool=False, da_bool=True, cot_bool=model_handler.cot)
 
         prompt_template = base_template.replace("$question$", "Which dialogue act is employed in the utterance contained in <utterance> tags?").replace("$output_specification$", "Present your answer as a single word.")
-        
+
         return prompt_template
-    
+
     def get_prev_utterances(self, instance, turn_ix):
         """
         Get the previous utterances in the dialogue.
@@ -34,15 +34,15 @@ class DASUHandler(WBaseTaskHandler):
                 if prev_turn["agent"] == 1:
                     spk = "THEM: "
                 prev_utterances.append(spk + prev_turn['data'])
-        
+
         if len(prev_utterances) > self.args.num_prior_utts:
             prev_utterances = prev_utterances[-self.args.num_prior_utts:]
-        
+
         return " ".join(prev_utterances)
 
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -73,7 +73,7 @@ class DASUHandler(WBaseTaskHandler):
                     prompt = prompt.replace("$num_books$", str(instance["scenario"]["kbs"][0][0]["Count"]))
                     prompt = prompt.replace("$num_hats$", str(instance["scenario"]["kbs"][0][1]["Count"]))
                     prompt = prompt.replace("$num_balls$", str(instance["scenario"]["kbs"][0][2]["Count"]))
-                    
+
                     assert "$book_points$" in prompt
                     prompt = prompt.replace("$book_points$", str(instance["scenario"]["kbs"][0][0]["Value"]))
                     prompt = prompt.replace("$hat_points$", str(instance["scenario"]["kbs"][0][1]["Value"]))
@@ -83,6 +83,9 @@ class DASUHandler(WBaseTaskHandler):
                     ground_truth.append(turn['metadata']['intent'])
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -97,5 +100,5 @@ class DASUHandler(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

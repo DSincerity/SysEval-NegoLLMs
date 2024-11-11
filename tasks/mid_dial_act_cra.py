@@ -17,7 +17,7 @@ class CRADAHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, reg_or_con, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             reg_or_con: describes whether the prompt should include context or not.
@@ -28,7 +28,7 @@ class CRADAHandler(KBaseTaskHandler):
             base_template = dataset_handler.get_utt_template(context_bool=False, da_bool=True, cot_bool=model_handler.cot)
         elif reg_or_con == "con":
             base_template = dataset_handler.get_utt_template(context_bool=True, da_bool=True, cot_bool=model_handler.cot)
-            
+
         prompt_template = base_template.replace("$question$", "Which dialogue acts are employed in the utterance delimited by the <utterance> tags?").replace("$output_specification$", "Present your answer as a Python list of the relevant options. At least one option applies.")
 
         return prompt_template
@@ -37,9 +37,9 @@ class CRADAHandler(KBaseTaskHandler):
 class CRARegDAHandler(CRADAHandler):
     """Handler for the CRA Dialogue Acts task of determining the coarse dialogue act of an utterance without previous utterances as context."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -68,7 +68,7 @@ class CRARegDAHandler(CRADAHandler):
             if isinstance(inst["utt"], str):
                 instances2.append(inst)
                 ground_truth2.append(gt)
-        
+
         instances = instances2
         ground_truth = ground_truth2
 
@@ -96,6 +96,9 @@ class CRARegDAHandler(CRADAHandler):
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -108,7 +111,7 @@ class CRARegDAHandler(CRADAHandler):
             "unique": len(new_prompts),
             "valid": len(final_prompts),
         }
-        
+
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

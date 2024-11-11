@@ -18,11 +18,11 @@ class GSCaHandler(WBaseTaskHandler):
         base_template = dataset_handler.get_dial_template(counts_bool=True, values_bool=True, utterance_bool=False, dialogue_bool=True, cot_bool=model_handler.cot)
 
         prompt_template = base_template.replace("$question$", "Given the recent dialogue history inside <dialogue> tags, generate your next response in the negotiation concisely, following a similar style as previous utterances.").replace("$output_specification$", "")
-        
+
         return prompt_template
 
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
         and ground truth.
 
         Args:
@@ -44,7 +44,7 @@ class GSCaHandler(WBaseTaskHandler):
                 if instance["chat_logs"][i]["id"] != "mturk_agent_1":
                     # skip the other agent's turn
                     continue
-                    
+
                 if instance["chat_logs"][i]["text"] in ["Submit-Deal", "Reject-Deal", "Accept-Deal", "Walk-Away"]:
                     # skip the special utterances
                     continue
@@ -58,18 +58,21 @@ class GSCaHandler(WBaseTaskHandler):
 
                 prompts.append(prompt)
 
-        # get the model outputs - dict from prompt to the output. 
+        # get the model outputs - dict from prompt to the output.
         # It's possible that some are missing so a dict is better than a list.
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
-        
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
-        
+
         final_prompts, final_predictions, final_ground_truth = [], [], []
 
         for prompt, gt in zip(new_prompts, new_ground_truth):
             if prompt not in outputs_dict:
                 continue
-            
+
             final_prompts.append(prompt)
             final_ground_truth.append(gt)
 
@@ -83,5 +86,5 @@ class GSCaHandler(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

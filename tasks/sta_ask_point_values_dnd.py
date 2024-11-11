@@ -19,7 +19,7 @@ class DNDNDPointValuesHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             model_handler: the model handler.
@@ -62,7 +62,7 @@ class DNDNDPointValuesHandler(KBaseTaskHandler):
             ground_truth.append(gt)
 
         return ground_truth
-    
+
     # def them_base_ground_truth(self, dataset_handler):
     #     """Get the [book-points, hat-points, ball-points] list for Agent THEM.
 
@@ -76,9 +76,9 @@ class DNDNDPointValuesHandler(KBaseTaskHandler):
 class BYDNDNDPointValuesHandler(DNDNDPointValuesHandler):
     """Handler for the DealOrNoDeal No-Dialogue Point Values task of determining how many points a book is worth to Agent YOU."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -100,18 +100,21 @@ class BYDNDNDPointValuesHandler(DNDNDPointValuesHandler):
         prompts = []
         for instance in instances:
             prompt = self.get_prompt_dnd(instance, prompt_template, "YOU")
-            
+
             # skip this - not required
             # prompt = prompt.replace("YOU:", "Agent 1:").replace("THEM:", "Agent 2:").replace("Agent YOU", "Agent 1").replace("Agent THEM", "Agent 2")
-            
+
             prompts.append(prompt)
 
         # get the ground truth for this task.
         ground_truth = self.you_base_ground_truth("input", instances)
-        
+
         # ground_truth = [str(lst[0]) for lst in base_ground_truth]
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
@@ -127,5 +130,5 @@ class BYDNDNDPointValuesHandler(DNDNDPointValuesHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

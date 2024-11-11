@@ -17,7 +17,7 @@ class CaWCPrioritiesHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             model_handler: the model handler.
@@ -30,7 +30,7 @@ class CaWCPrioritiesHandler(KBaseTaskHandler):
 
     def base_ground_truth(self, instances, agent):
         """Get the priority dict for the agent.
-        
+
             agent: the agent we want to get the priority dict for.
         """
 
@@ -45,7 +45,7 @@ class CaWCPrioritiesHandler(KBaseTaskHandler):
         """
 
         return self.base_ground_truth(instances, "mturk_agent_1")
-    
+
     def a2_base_ground_truth(self, instances):
             """Get the priority dict for Agent 2.
             """
@@ -56,9 +56,9 @@ class CaWCPrioritiesHandler(KBaseTaskHandler):
 class MidHigh1CaWCPrioritiesHandler(CaWCPrioritiesHandler):
     """Handler for the CaSiNo With Counts Priorities task of determining the lowest priority of Agent 1."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -89,6 +89,9 @@ class MidHigh1CaWCPrioritiesHandler(CaWCPrioritiesHandler):
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
         #only for the ones that are unique and where valid predictions are available
@@ -102,5 +105,5 @@ class MidHigh1CaWCPrioritiesHandler(CaWCPrioritiesHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

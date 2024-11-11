@@ -17,7 +17,7 @@ class JIDAHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, reg_or_con, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             reg_or_con: describes whether the prompt should include context or not.
@@ -28,27 +28,27 @@ class JIDAHandler(KBaseTaskHandler):
             base_template = dataset_handler.get_utt_template(context_bool=False, full_dial_bool=False, cot_bool=model_handler.cot, counts_bool=True, values_bool=True, da_bool=True)
         elif reg_or_con == "con":
             base_template = dataset_handler.get_utt_template(context_bool=True, full_dial_bool=False, cot_bool=model_handler.cot)
-            
+
         prompt_template = base_template.replace("$question$", "Which dialogue acts are employed in the utterance delimited by the <utterance> tags?").replace("$output_specification$", "Present your answer as a Python list of the relevant options. At least one option applies.")
 
         return prompt_template
-    
+
     def get_full_dial_prompt_template(self, dataset_handler, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             model_handler: the model handler.
         """
         base_template = dataset_handler.get_utt_template(context_bool=False, full_dial_bool=True, cot_bool=model_handler.cot)
-            
+
         prompt_template = base_template.replace("$question$", "Which dialogue act(s) listed in the <options> tags are employed in EACH UTTERANCE of the dialogue delimited by the <dialogue> tags?").replace("$output_specification$", "Present your answer as a Python list of tuples, where the first value of each tuple is an utterance such as 'worker: I want a higher salary.' and the second value of each tuple is a list of the dialogue acts in that utterance. At least one dialogue act applies to each utterance. Your list should contain $num_utterances$ tuples.")
 
         return prompt_template
-    
+
     def get_da_dialogue_ground_truth(self, dataset_handler):
         """Get the ground truth for dialogue-act tasks (i.e. dialogue-act annotations) in which a whole dialogue is input.
-        
+
         Args:
             dataset_handler: the dataset handler.
         """
@@ -73,7 +73,7 @@ class JIDAHandler(KBaseTaskHandler):
                 if turn_tags:
                     organized_dialogue_tags.append(turn_tags)
                     turn_tags = []
-                
+
                 ground_truth.append(organized_dialogue_tags)
                 organized_dialogue_tags = []
             if "<sep>" in tag:
@@ -97,10 +97,10 @@ class JIDAHandler(KBaseTaskHandler):
 
         # ground_truth is a list. Within this, each dialogue has its own list. A dialogue's list contains a list of tags for each turn in the dialogue.
         return ground_truth
-    
+
     def get_da_turn_ground_truth(self, dataset_handler):
         """Get the ground truth for dialogue-act tasks (i.e. dialogue-act annotations) in which a single turn is input.
-        
+
         Args:
             dataset_handler: the dataset handler.
         """
@@ -122,7 +122,7 @@ class JIRegDAHandler(JIDAHandler):
 
     def get_prev_utterances(self, turns, turn):
         """Get prev utterances for this turn."""
-        
+
         def get_turn_str(tt):
             """Convert the turn list of phrases to a single string."""
 
@@ -151,16 +151,16 @@ class JIRegDAHandler(JIDAHandler):
                 prev_utterances.append(prev_turn_str)
             else:
                 break
-        
+
         if len(prev_utterances) > self.args.num_prior_utts:
             prev_utterances = prev_utterances[-self.args.num_prior_utts:]
-        
-        return " ".join(prev_utterances)
-    
 
-    def evaluate(self, dataset_handler, model_handler):
+        return " ".join(prev_utterances)
+
+
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -183,7 +183,7 @@ class JIRegDAHandler(JIDAHandler):
             if len(turns) != len(dwgt):
                 print("Mismatched lengths: ", len(turns), len(dwgt))
                 continue
-                
+
             for turn, gt in zip(turns, dwgt):
 
                 turn_obj = {
@@ -207,7 +207,7 @@ class JIRegDAHandler(JIDAHandler):
             prompts.append(prompt)
 
         assert len(prompts) == len(flat_ground_truth)
-        
+
         ground_truth = flat_ground_truth[:]
 
         # remove cases where the prompt contains structured utterances
@@ -220,9 +220,12 @@ class JIRegDAHandler(JIDAHandler):
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
 
-        
+
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
         #only for the ones that are unique and where valid predictions are available
@@ -234,7 +237,7 @@ class JIRegDAHandler(JIDAHandler):
             "unique": len(new_prompts),
             "valid": len(final_prompts),
         }
-        
+
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return turns

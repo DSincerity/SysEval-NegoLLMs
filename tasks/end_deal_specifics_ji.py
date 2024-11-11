@@ -25,12 +25,12 @@ class BidHandlerJI(WBaseTaskHandler):
         base_template = dataset_handler.get_dial_template(counts_bool=True, cot_bool=model_handler.cot, values_bool=True, dialogue_bool=False, full_dialogue_bool=True)
 
         prompt_template = base_template.replace("$question$", "In the final deal, what value was agreed on for each issue?").replace("$output_specification$", "Present your answer as a json within <answer> </answer> tags with keys as issues (Company, Position, Workplace, Salary, Days_off) and values as the corresponding answers. If you are unsure, pick your best guess.")
-        
+
         return prompt_template
 
-    def evaluate(self, dataset_handler, model_handler, 
+    def evaluate(self, dataset_handler, model_handler,
                          instances, prompts, ground_truth):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
+        """Evaluate the task. Stores the prompts, instances, outputs,
         and ground truth.
 
         Args:
@@ -38,9 +38,12 @@ class BidHandlerJI(WBaseTaskHandler):
             model_handler: The model handler.
         """
 
-        # get the model outputs - dict from prompt to the output. 
+        # get the model outputs - dict from prompt to the output.
         # It's possible that some are missing so a dict is better than a list.
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -55,7 +58,7 @@ class BidHandlerJI(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances
 
 
@@ -73,7 +76,7 @@ class FComHandler(BidHandlerJI):
         for instance in instances:
             # isolate dialogue from data
             prompt = self.get_prompt_with_bids_ji(instance, prompt_template)
-   
+
             # prompt = prompt.replace("$issue$", "company")
             # prompt = prompt.replace("$type$", "single word")
             # prompt = prompt.replace("$default$", "None")
@@ -83,7 +86,7 @@ class FComHandler(BidHandlerJI):
 
     def get_ground_truth(self, instances):
         """Get the ground truth for the task.
-        
+
         Args:
             instances: A dictionary of rows from the dataset.
         """
@@ -108,13 +111,13 @@ class FComHandler(BidHandlerJI):
                     "Salary": "NA",
                     "Days_off": "NA",
                 }
-            
+
             ground_truth.append(gt)
         return ground_truth
 
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -135,5 +138,5 @@ class FComHandler(BidHandlerJI):
 
         prompts, ground_truth = prompts2, ground_truth2
 
-        super().evaluate(dataset_handler, model_handler, 
+        super().evaluate(dataset_handler, model_handler,
                          instances, prompts, ground_truth)

@@ -19,7 +19,7 @@ class CaNDPointValuesHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             model_handler: the model handler.
@@ -42,7 +42,7 @@ class CaNDPointValuesHandler(KBaseTaskHandler):
 
         # a list of priority dicts in the form {'Low': 'Water', 'Medium': 'Food', 'High': 'Firewood'}.
         true_priorities = [i["participant_info"][agent]["value2issue"] for i in instances]
-        
+
         # get a list of dicts in the form {'Water': 'Low', 'Food': 'Medium', 'Firewood': 'High'}.
         items_first = []
         for priority_dict in true_priorities:
@@ -60,7 +60,7 @@ class CaNDPointValuesHandler(KBaseTaskHandler):
                 else:
                     dict2[k.lower()] = "5"
             return dict2
-        
+
         # return base ground truth: a list of dicts in the form {"Water": 3, "Food": 4, "Firewood": 5}.
         return [priority2points(dict) for dict in items_first]
 
@@ -69,23 +69,23 @@ class CaNDPointValuesHandler(KBaseTaskHandler):
         """
 
         return self.base_ground_truth(instances, "mturk_agent_1")
-    
+
     def a2_base_ground_truth(self, instances):
         """Get the item-and-points dict for Agent 2.
 
         """
 
         # get the instances from the dataset.
-        
+
         return self.base_ground_truth(instances, "mturk_agent_2")
 
 
 class Food1CaNDPointValuesHandler(CaNDPointValuesHandler):
     """Handler for the CaSiNo No-Dialogue Point Values task of determining how many points a food package is worth to Agent 1."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -98,7 +98,7 @@ class Food1CaNDPointValuesHandler(CaNDPointValuesHandler):
 
         # get the instances and dialogues from the dataset
         instances = dataset_handler.get_instances()
-        
+
         self.prompt_template = self.get_prompt_template(dataset_handler, model_handler)
 
         # self.prompt_template = prompt_template.replace("$agent$", "mturk_agent_1").replace("$item_type$", "food")
@@ -115,6 +115,9 @@ class Food1CaNDPointValuesHandler(CaNDPointValuesHandler):
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -129,5 +132,5 @@ class Food1CaNDPointValuesHandler(CaNDPointValuesHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

@@ -13,7 +13,7 @@ from tasks.task_w import WBaseTaskHandler
 
 
 class NSUHandler(WBaseTaskHandler):
-    """Handler for the task of identifying the negotiation strategies present in 
+    """Handler for the task of identifying the negotiation strategies present in
     each utterance."""
 
     possible_outputs =  ["small-talk", "empathy", "coordination", "no-need", "elicit-pref", "uv-part", "vouch-fair", "self-need", "other-need"]
@@ -23,13 +23,13 @@ class NSUHandler(WBaseTaskHandler):
         base_template = dataset_handler.get_utt_template(counts_bool=True, values_bool=True, utterance_bool=True, cot_bool=model_handler.cot)
 
         prompt_template = base_template.replace("$question$", "Which negotiation strategies are employed in the utterance?").replace("$output_specification$", "Present your answer as a comma-separated list of strategies, contained in <answer> </answer> tags with no additional text.")
-        
+
         return prompt_template
-    
+
 
     def find_spk_str(self, instance, curr_txt):
         """Go through the chat and find the speaker string for this utterance."""
-        
+
         for item in instance['chat_logs']:
             if item['text'] == curr_txt:
                 if item['id'] == "mturk_agent_1":
@@ -42,7 +42,7 @@ class NSUHandler(WBaseTaskHandler):
 
     def get_prev_utterances(self, instance, curr_txt):
         """Find sequence of prev utterances with speakers."""
-        
+
         prev_utts = []
         for item in instance['annotations']:
             if item[0] != curr_txt:
@@ -57,11 +57,11 @@ class NSUHandler(WBaseTaskHandler):
         prev_utts = [self.find_spk_str(instance, utt) + utt for utt in prev_utts]
 
         return " ".join(prev_utts)
-    
 
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -78,18 +78,18 @@ class NSUHandler(WBaseTaskHandler):
         for instance in instances:
             annotations = instance['annotations']
             for index in range(len(annotations)):
-                
+
                 if "non-strategic" in annotations[index][-1]:
                     # skip non-strategic utterances
                     continue
-                
+
                 if self.args.num_prior_utts == 0:
                     prompt = prompt_template.replace("$utterance$", annotations[index][0])
                 else:
                     spk_str = self.find_spk_str(instance, annotations[index][0])
                     prompt = prompt_template.replace("$utterance$", spk_str + annotations[index][0])
                     prompt = prompt.replace("$previous_utterance$", self.get_prev_utterances(instance, annotations[index][0]))
-                
+
                 # fill in the values.
                 agent1_dict = instance['participant_info']["mturk_agent_1"]["value2issue"]
                 agent1_switched = {item: level for level, item in agent1_dict.items()}
@@ -107,7 +107,7 @@ class NSUHandler(WBaseTaskHandler):
                 prompt = prompt.replace("$fire_points$", str(agent1_points['Firewood']))
 
                 prompts.append(prompt)
-                
+
                 if "," in annotations[index][-1]:
                     gt_str = annotations[index][-1].replace("promote-coordination", "coordination")
 
@@ -120,6 +120,9 @@ class NSUHandler(WBaseTaskHandler):
         # It's possible that some are missing so a dict is better than a list.
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
         final_prompts, final_predictions, final_ground_truth = [], [], []
@@ -127,7 +130,7 @@ class NSUHandler(WBaseTaskHandler):
         for prompt, gt in zip(new_prompts, new_ground_truth):
             if prompt not in outputs_dict:
                 continue
-            
+
             final_prompts.append(prompt)
             final_ground_truth.append(gt)
 
@@ -147,5 +150,5 @@ class NSUHandler(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-            
+
         return instances

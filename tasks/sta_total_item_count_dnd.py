@@ -21,12 +21,12 @@ class TICNDHandlerDND(WBaseTaskHandler):
         base_template = dataset_handler.get_dial_template(counts_bool=True, values_bool=True, dialogue_bool=False, da_bool=False, cot_bool=model_handler.cot)
 
         prompt_template = base_template.replace("$question$", "What is the total number of items being negotiated over?").replace("$output_specification$", "Present your answer as a single number with no additional text.")
-        
+
         return prompt_template
 
-    def evaluate(self, dataset_handler, model_handler):
-        """Evaluate the task. Stores the prompts, instances, outputs, 
-        and ground truth. 
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
+        """Evaluate the task. Stores the prompts, instances, outputs,
+        and ground truth.
 
         Args:
             dataset_handler: The dataset handler.
@@ -47,9 +47,12 @@ class TICNDHandlerDND(WBaseTaskHandler):
             total_count = sum(instance['input']['count'])
             ground_truth.append(str(total_count))
 
-        # get the model outputs - dict from prompt to the output. 
+        # get the model outputs - dict from prompt to the output.
         # It's possible that some are missing so a dict is better than a list.
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -64,5 +67,5 @@ class TICNDHandlerDND(WBaseTaskHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

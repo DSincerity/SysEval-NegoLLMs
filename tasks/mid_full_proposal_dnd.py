@@ -20,18 +20,18 @@ class DNDAllSlotsHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, reg_or_con, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             reg_or_con: describes whether the prompt should include context or not.
             model_handler: the model handler.
         """
-        
+
         if reg_or_con == "reg":
             base_template = dataset_handler.get_utt_template(counts_bool=True, values_bool=True, context_bool=False, da_bool=False, cot_bool=model_handler.cot)
         elif reg_or_con == "con":
             base_template = dataset_handler.get_utt_template(counts_bool=True, values_bool=True, context_bool=True, da_bool=False, cot_bool=model_handler.cot)
-            
+
         prompt_template = base_template.replace("$question$", "How many items does the speaker get for each issue in the proposal delimited by the <utterance> tags?").replace("$output_specification$", "Present your answer as a json within <answer> </answer> tags with keys as issues (books, hats, and balls) and values as the corresponding answers. If the answer is not clear for an issue, pick your best guess.")
 
         return prompt_template
@@ -50,7 +50,7 @@ class DNDAllSlotsHandler(KBaseTaskHandler):
             speaker = instance["agent"]
             proposal = instance["metadata"]["proposal"][str(speaker)]
             proposal = dict(sorted(proposal.items()))
-            
+
             # replace with plural names
             new_proposal_dict = {
                 "books": proposal["book"],
@@ -66,9 +66,9 @@ class DNDAllSlotsHandler(KBaseTaskHandler):
 class DNDRegAllSlotsHandler(DNDAllSlotsHandler):
     """Handler for the DealOrNoDeal All Slots task of determining the entire deal proposed in an utterance without previous utterances as context."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -90,15 +90,18 @@ class DNDRegAllSlotsHandler(DNDAllSlotsHandler):
         prompts = []
         for instance in instances:
             prompt = self.get_reg_slot_prompt_dnd(instance, self.prompt_template)
-            
+
             # prompt = prompt.replace("YOU:", "Agent 1:").replace("THEM:", "Agent 2:").replace("Agent YOU", "Agent 1").replace("Agent THEM", "Agent 2")
-            
+
             prompts.append(prompt)
 
         # get the ground truth for this task.
         ground_truth = self.extract_ground_truth(instances)
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
+
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
 
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
@@ -114,5 +117,5 @@ class DNDRegAllSlotsHandler(DNDAllSlotsHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances

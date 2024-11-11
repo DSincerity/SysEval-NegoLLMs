@@ -16,7 +16,7 @@ class KBaseTaskHandler:
         self.name = name
         self.args = args
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Primary method to evaluate a task on a given model and dataset.
         Stores instances, prompts, outputs, and ground truth.
 

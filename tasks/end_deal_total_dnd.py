@@ -17,7 +17,7 @@ class DNDDealPointsHandler(KBaseTaskHandler):
 
     def get_prompt_template(self, dataset_handler, model_handler):
         """Get the basic prompt template for the task, using functions from the dataset handler.
-        
+
         Args:
             dataset_handler: the dataset handler.
             model_handler: the model handler.
@@ -30,7 +30,7 @@ class DNDDealPointsHandler(KBaseTaskHandler):
 
     def find_deal_counts(self, deal_lst):
         """Extract relevant information from the lists of strings describing deals in the dataset.
-        
+
         Args:
             deal_lst: a list with strings describing the deal achieved by the agents.
         """
@@ -43,10 +43,10 @@ class DNDDealPointsHandler(KBaseTaskHandler):
                 string_count = int(string[string.index("=") + 1:])
                 new_lst.append(string_count)
         return new_lst
-    
+
     def find_deal_points(self, count_lst, value_lst):
         """Use information about how many items an agent received to determine how many points they scored in the deal.
-        
+
         Args:
             count_lst: a list of the counts of each item type an agent received.
             value_lst: a list describing how many points each item type is worth to the agent.
@@ -70,17 +70,17 @@ class DNDDealPointsHandler(KBaseTaskHandler):
 
         # a list of deal quantity lists in the form [you_deal_books, you_deal_hats, you_deal_balls, them_deal_books, them_deal_hats, them_deal_balls].
         deals = [i["output"].split(" ") for i in instances]
-        
+
         # a list of Agent You's deal quantity lists in the form [you_deal_books, you_deal_hats, you_deal_balls].
         you_deals = [lst[:3] for lst in deals]
 
         # update you_deals to you_counts so that the quantity lists are simply lists of integers.
         you_counts = [self.find_deal_counts(lst) for lst in you_deals]
-        
+
         # use Agent You's deal_counts from you_counts and value function to compute the points for an instance.
         # return the base ground truth: a list of ints representing the points scored by Agent You for each respective instance.
         return [self.find_deal_points(you_counts[index], instances[index]["input"]["value"]) for index in range(len(instances))]
-    
+
     def them_base_ground_truth(self, instances):
         """Get the number of points Agent THEM achieved in the deal.
 
@@ -93,13 +93,13 @@ class DNDDealPointsHandler(KBaseTaskHandler):
 
         # a list of deal quantity lists in the form [you_deal_books, you_deal_hats, you_deal_balls, them_deal_books, them_deal_hats, them_deal_balls].
         deals = [i["output"].split(" ") for i in instances]
-        
+
         # a list of Agent Them's deal quantity lists in the form [them_deal_books, them_deal_hats, them_deal_balls].
         them_deals = [lst[3:] for lst in deals]
 
         # update them_deals to them_counts so that the quantity lists are simply lists of integers.
         them_counts = [self.find_deal_counts(lst) for lst in them_deals]
-        
+
         # use Agent Them's deal_counts from you_counts and value function to compute the points for an instance.
         # return the base ground truth: a list of ints representing the points scored by Agent Them for each respective instance.
         return [self.find_deal_points(them_counts[index], instances[index]["partner_input"]["value"]) for index in range(len(instances))]
@@ -108,9 +108,9 @@ class DNDDealPointsHandler(KBaseTaskHandler):
 class YDNDDealPointsHandler(DNDDealPointsHandler):
     """Handler for the DealOrNoDeal Deal Points task of determining how many points Agent YOU achieved in the deal."""
 
-    def evaluate(self, dataset_handler, model_handler):
+    def evaluate(self, dataset_handler, model_handler, return_prompt_gt=False):
         """Evaluate the task.
-        
+
         Performs:
         1) Performance evaluation of the model on the dataset.
         2) Printing of aggregate results.
@@ -139,6 +139,9 @@ class YDNDDealPointsHandler(DNDDealPointsHandler):
 
         new_prompts, new_ground_truth = self.remove_duplicates(prompts, ground_truth)
 
+        if return_prompt_gt:
+            return new_prompts, new_ground_truth
+
         # get the model outputs - dict from prompt to the output. It's possible that some are missing so a dict is better than a list.
         outputs_dict = model_handler.get_model_outputs(new_prompts, new_ground_truth)
 
@@ -153,5 +156,5 @@ class YDNDDealPointsHandler(DNDDealPointsHandler):
         }
 
         self.log_everything(stats, final_prompts, final_predictions, final_ground_truth, outputs_dict, dataset_handler, model_handler)
-        
+
         return instances
