@@ -58,3 +58,19 @@ sh baselines/scripts/evaluate.sh
 # Generateion
 sh baselines/scripts/generate.sh
 ```
+
+## References
+If you use data or code in this repository, please cite our paper:
+
+```bibtex
+@article{kwon2024llms,
+  title={Are LLMs Effective Negotiators? Systematic Evaluation of the Multifaceted Capabilities of LLMs in Negotiation Dialogues},
+  author={Kwon, Deuksin and Weiss, Emily and Kulshrestha, Tara and Chawla, Kushal and Lucas, Gale M and Gratch, Jonathan},
+  journal={arXiv preprint arXiv:2402.13550},
+  year={2024}
+}
+```
+
+
+## LICENSE
+Please refer to the LICENSE file in the root directory for more details.
