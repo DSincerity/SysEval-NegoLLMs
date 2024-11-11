@@ -1,7 +1,7 @@
 #!/bin/bash
 experiment_nm='train_t5_for_mid_ask_high_priority_ca'
 
-python3 baselines/main_release.py   --storage_dir baselines/processed_datasets \
+python3 baselines/main.py   --storage_dir baselines/processed_datasets \
                             --output_dir model_output/$experiment_nm \
                             --model_name  hf_model \
                             --do_train  \
