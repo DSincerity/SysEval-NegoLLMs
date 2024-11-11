@@ -10,9 +10,14 @@
 
 ## Environment Setup
 
-1. **Requirements**: This framework requires **Python ≥ 3.9**. It has been tested with Python 3.9.17.
+1. **Requirements**: This framework requires **Python ≥ 3.10**. It has been tested with Python 3.10.15 with CUDA Version 11.4
 
-2. **Install Libraries**: Install all required libraries using the following command:
+2. **Create a environment**: Create a virtual enviroment for development
+```bash
+conda create -n negollm python=3.10
+```
+
+3. **Install Libraries**: Under the created environment, install all required libraries using the following command:
 ```bash
 pip install -r requirements.txt
 ```
