@@ -25,7 +25,7 @@ class PHandlerCa(WBaseTaskHandler):
         return prompt_template
 
     def evaluate(self, dataset_handler, model_handler,
-                 instances, prompts, ground_truth):
+                 instances, prompts, ground_truth, return_prompt_gt=False):
         """Evaluate the task. Stores the prompts, instances, outputs, and ground truth.
 
         Args:
