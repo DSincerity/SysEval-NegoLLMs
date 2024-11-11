@@ -150,8 +150,8 @@ class OpenAIHandler(BaseModelHandler):
 
                         output_text = gen_output["choices"][0]["message"]["content"]
                         outputs[inputs[index]] = output_text
-                    except:
-                        print(f"Some error here.")
+                    except Exception as e:
+                        print(f"Some error here: {e}")
                         continue
 
                     if (index + 1) >= self.args.max_num_instances:
