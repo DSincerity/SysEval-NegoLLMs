@@ -39,6 +39,13 @@ def add_arguments(parent_parser):
         default=10,
     )
 
+    # max cutoff for the num instances - regardless of what the above param says.
+    parser.add_argument(
+        "--max_num_instances",
+        type=int,
+        default=200,
+    )
+
     # num utterances for the partial dialogue (used for tasks like mid_ask_low_priority_ca and mid_partner_ask_low_priority_ca). This includes utterances from both agents. So if you want 2 utterances from each agent, set this to 4.
     parser.add_argument(
         "--num_utts_partial_dial",
