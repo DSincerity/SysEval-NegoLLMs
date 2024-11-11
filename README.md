@@ -36,10 +36,10 @@ export OPENAI_API_KEY="YOUR_API_KEY"
 
 ```bash
 # Evaluate GPT-4
-sh run/scripts/openai_gpt4.sh
+sh scripts/openai_gpt4.sh
 
 # Additional Analysis for GPT-4 (including prompting strategies)
-sh run/scripts/openai_gpt4_additional_exp.sh
+sh scripts/openai_gpt4_additional_exp.sh
 ```
 
 ---
