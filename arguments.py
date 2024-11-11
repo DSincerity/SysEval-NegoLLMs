@@ -39,13 +39,35 @@ def add_arguments(parent_parser):
         default=10,
     )
 
-    # num utterances for the partial dialogue (used for tasks like mid_ask_low_priority_ca and mid_partner_ask_low_priority_ca). This could includes utterances from both agents. So if you want 2 utterances from each agent, set this to 4.
+    # num utterances for the partial dialogue (used for tasks like mid_ask_low_priority_ca and mid_partner_ask_low_priority_ca). This includes utterances from both agents. So if you want 2 utterances from each agent, set this to 4.
     parser.add_argument(
         "--num_utts_partial_dial",
         type=int,
-        default=-1,  # -1 means all utterances
+        default=-1, # -1 means all utterances
     )
 
+    # chain of thought
+    parser.add_argument(
+        "--use_cot",
+        type=bool,
+        default=False,
+    )
+
+    # multishot
+    parser.add_argument(
+        "--num_multishot",
+        type=int,
+        default=0, # 0 means only the utterance that needs to be annotated will be used.
+    )
+
+    # prior context
+    parser.add_argument(
+        "--num_prior_utts",
+        type=int,
+        default=0, # 0 means only the utterance that needs to be annotated will be used without any prior context
+    )
+
+    # hf_model huggingface string name as hosted in the Huggingface hub here: https://huggingface.co/models
     parser.add_argument(
         "--hf_model_str",
         type=str,
