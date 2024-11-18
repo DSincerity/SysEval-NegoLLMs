@@ -63,11 +63,13 @@ sh baselines/scripts/generate.sh
 If you use data or code in this repository, please cite our paper:
 
 ```bibtex
-@article{kwon2024llms,
-  title={Are LLMs Effective Negotiators? Systematic Evaluation of the Multifaceted Capabilities of LLMs in Negotiation Dialogues},
-  author={Kwon, Deuksin and Weiss, Emily and Kulshrestha, Tara and Chawla, Kushal and Lucas, Gale M and Gratch, Jonathan},
-  journal={arXiv preprint arXiv:2402.13550},
-  year={2024}
+@inproceedings{kwon-etal-2024-llms,
+    title = "Are {LLM}s Effective Negotiators? Systematic Evaluation of the Multifaceted Capabilities of {LLM}s in Negotiation Dialogues",
+    author = "Kwon, Deuksin and Weiss, Emily and Kulshrestha, Tara and Chawla, Kushal and Lucas, Gale and Gratch, Jonathan",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2024",
+    publisher = "Association for Computational Linguistics",
+    pages = "5391--5413",
+    year = "2024"
 }
 ```
 
